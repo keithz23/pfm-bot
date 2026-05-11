@@ -20,7 +20,7 @@ jobs:
 
       - name: Build & Push Bot Image
         run: |
-          docker build -t keith0309/pfm-bot:latest ./pfm-bot 
+          docker build -t keith0309/pfm-bot:latest ./pfm-be
           docker push keith0309/pfm-bot:latest
 
   deploy-to-ec2:
