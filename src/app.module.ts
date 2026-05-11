@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TelegrafModule } from 'nestjs-telegraf';
-import { validationSchema } from './config/validation.schema';
 import appConfig from './config/app.config';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
@@ -18,7 +17,6 @@ import * as LocalSession from 'telegraf-session-local';
       isGlobal: true,
       envFilePath: ['.env', '.env.production'],
       load: [appConfig],
-      validationSchema,
       validationOptions: {
         allowUnknown: true,
         abortEarly: true,
