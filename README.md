@@ -1,85 +1,136 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 💰 PFM Bot - Personal Finance Management 
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+An automated, high-performance personal finance management system operating via a Telegram Bot. Designed with scalability and security in mind, this project features fast-logging capabilities, multi-wallet management, and intuitive reporting, fully optimized for both local development and Production deployment via AWS.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🛠 Tech Stack
 
-## Description
+- **Backend:** NestJS, TypeScript
+- **Database:** PostgreSQL (Primary storage), Redis (Caching & Queueing)
+- **ORM:** Prisma
+- **Bot Framework:** Telegraf
+- **DevOps & Infrastructure:** Docker, Docker Compose, GitHub Actions (CI/CD), AWS EC2
+- **Architecture:** Monolith (structured for easy microservices extraction), Dockerized Environments
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## ✨ Key Features
 
-## Project setup
+- **Lightning-Fast Logging:** Record transactions in seconds with smart parsing.
+- **Multi-Wallet Management:** Manage and track balances across Cash, Bank, and E-Wallets simultaneously.
+- **Dynamic Reporting:** Generate detailed daily summaries and monthly financial reports with percentage breakdowns.
+- **Security-First Design:** Databases are isolated from the public internet. Access is strictly managed via SSH Tunneling on AWS EC2.
+- **Automated CI/CD:** Zero-downtime deployment pipeline utilizing GitHub Actions and Docker image pruning.
 
-```bash
-$ npm install
+---
+
+## 📂 Project Structure
+
+```text
+.
+├── src/                # NestJS backend source code
+├── prisma/             # Database schema and migrations
+├── .github/workflows/  # CI/CD automation pipelines
+├── docker-compose.dev.yml   # Development environment (Hot-reload enabled)
+├── docker-compose.prod.yml  # Production environment (Security-first)
+├── Dockerfile          # Multi-stage build configuration
+└── README.md
 ```
 
-## Compile and run the project
+---
 
+## 🚀 Getting Started (How to Run Locally)
+
+Follow these instructions to set up and run the project on your local machine for development and testing.
+
+### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/) and Docker Compose installed.
+- [Node.js](https://nodejs.org/) (v18 or higher) installed locally.
+- A Telegram Bot Token (Get one by chatting with [@BotFather](https://t.me/botfather) on Telegram).
+
+### 1. Clone the Repository
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone [https://github.com/yourusername/pfm-bot.git](https://github.com/yourusername/pfm-bot.git)
+cd pfm-bot
 ```
 
-## Run tests
+### 2. Environment Configuration
+Create a `.env` file in the root directory and configure your environment variables. You can use the following template:
 
-```bash
-# unit tests
-$ npm run test
+```env
+# --- DATABASE CONFIG ---
+POSTGRES_USER=your_db_user
+POSTGRES_PASSWORD=your_secure_password
+POSTGRES_DB=pfm_database
 
-# e2e tests
-$ npm run test:e2e
+# Prisma Database URL (uses 'db' as the host matching the Docker service name)
+DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public"
 
-# test coverage
-$ npm run test:cov
+# --- TELEGRAM CONFIG ---
+TELEGRAF_TOKEN=your_telegram_bot_token_here
+MY_CHAT_ID=your_personal_chat_id
+
+# --- REDIS CONFIG ---
+REDIS_HOST=redis
+REDIS_PORT=6379
 ```
 
-## Resources
+> ⚠️ **IMPORTANT NOTE:** Make sure to find `MY_CHAT_ID` in the `.env` file (and anywhere else it might be hardcoded in the source code) and replace it with your actual Telegram `chat_id`. This ensures that specific administrative alerts, daily reminders, and restricted reports are sent directly to your personal Telegram account.
 
-Check out a few resources that may come in handy when working with NestJS:
+### 3. Start the Development Environment
+We use a dedicated Docker Compose file for development (`docker-compose.dev.yml`) which maps ports to your localhost for easy debugging.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+# Build and start the containers in detached mode
+docker-compose -f docker-compose.dev.yml up -d --build
+```
 
-## Support
+### 4. Apply Database Migrations
+Once the database container is running, push the Prisma schema to initialize your database tables:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+# Run Prisma migration
+npx prisma migrate dev --name init
 
-## Stay in touch
+# (Optional) Open Prisma Studio to view your database GUI at http://localhost:5555
+npx prisma studio
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+*To stop the local environment cleanly:*
+```bash
+docker-compose -f docker-compose.dev.yml down
+```
 
-## License
+---
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 🌍 Production Deployment (AWS EC2)
+
+This repository is configured with a fully automated CI/CD pipeline. 
+
+### Deployment Workflow:
+1. **Push to Branch:** Pushing code to the designated deployment branch triggers GitHub Actions.
+2. **Build & Push:** The runner builds a multi-stage, highly optimized Docker image and pushes it to Docker Hub.
+3. **Server Update:** The pipeline SSHs into the AWS EC2 instance, transfers the updated `.env` and `docker-compose.prod.yml` files.
+4. **Zero-Downtime Restart:** The server pulls the new image, runs `npx prisma migrate deploy` to safely update the database schema, and restarts the NestJS application container.
+5. **Cleanup:** Dangling images are pruned to optimize EC2 storage space.
+
+*Note: In the `docker-compose.prod.yml`, the PostgreSQL port is bound to `127.0.0.1:5432` to ensure the database is not exposed to the public internet. Database management is handled securely via SSH Tunneling.*
+
+---
+
+## 📟 Bot Commands Reference
+
+| Command | Syntax / Example | Description |
+| :--- | :--- | :--- |
+| `/start` | `/start` | Initializes the user profile and creates default wallets (Cash, Bank, E-Wallet). |
+| `/spend` | `/spend 50000 an_uong bank lunch` | Logs an expense. Format: `[Amount] [Category] [Wallet Alias] [Optional Note]`. |
+| `/today` | `/today` | Retrieves a chronological list of today's expenses and total spent. |
+| `/report` | `/report 5/2026` | Generates a comprehensive monthly report with budget percentage breakdowns and wallet balances. |
+
+---
+
+## 👤 Author
+
+**Vuong Tuan Kiet** - **Role:** Full-stack Developer 
+- **Focus:** Backend Architecture, Scalable APIs, Cloud Infrastructure
+- **Interests:** High-load Systems, Distributed Systems, AWS Architecture.
+
+---
+⭐ *If you find this repository useful, please consider giving it a star!*
