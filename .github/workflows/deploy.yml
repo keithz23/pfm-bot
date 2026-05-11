@@ -54,6 +54,6 @@ jobs:
           script: |
             cd ~/pfm-bot
             
-            sudo docker-compose -f docker-compose.prod.yml pull
-            sudo docker-compose -f docker-compose.prod.yml up -d
+            sudo docker compose -f docker-compose.prod.yml pull
+            sudo docker compose -f docker-compose.prod.yml up -d
             sudo docker image prune -f
