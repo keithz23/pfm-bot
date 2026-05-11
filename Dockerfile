@@ -6,13 +6,13 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
+COPY tsconfig*.json ./
 
 RUN npm ci
-
 RUN npx prisma generate
 
 COPY . .
-
 RUN npm run build
 
 
@@ -26,10 +26,11 @@ WORKDIR /app
 
 COPY --chown=node:node package*.json ./
 COPY --chown=node:node prisma ./prisma/
+COPY --chown=node:node prisma.config.ts ./
 
 RUN npm ci --omit=dev && npm cache clean --force
 
-RUN npx prisma generate
+COPY --from=builder --chown=node:node /app/generated ./generated
 
 COPY --from=builder --chown=node:node /app/dist ./dist
 
@@ -37,4 +38,4 @@ USER node
 
 EXPOSE 8000
 
-CMD ["node", "dist/src/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]

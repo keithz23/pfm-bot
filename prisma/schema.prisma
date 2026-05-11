@@ -10,7 +10,7 @@ datasource db {
 enum TransactionType {
   INCOME   @map("income")
   EXPENSE  @map("expense")
-  TRANSFER @map("transfer") // thêm để hỗ trợ chuyển khoản giữa ví
+  TRANSFER @map("transfer")
 }
 
 enum WalletType {
@@ -28,7 +28,7 @@ model User {
   currency      String   @default("VND") @db.VarChar(3)
   monthlyBudget Decimal? @map("monthly_budget") @db.Decimal(12, 2)
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz // thêm
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   categories   Category[]
   wallets      Wallet[]
@@ -46,9 +46,9 @@ model Category {
   color       String?  @db.VarChar(7)
   budgetLimit Decimal? @map("budget_limit") @db.Decimal(12, 2)
   isDefault   Boolean  @default(false) @map("is_default")
-  parentId    String?  @map("parent_id") @db.Uuid // thêm: subcategory
+  parentId    String?  @map("parent_id") @db.Uuid
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz // thêm
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   parent       Category?     @relation("CategoryTree", fields: [parentId], references: [id])
@@ -69,12 +69,12 @@ model Wallet {
   type      WalletType
   balance   Decimal    @default(0) @db.Decimal(15, 2)
   color     String?    @db.VarChar(7)
-  isDefault Boolean    @default(false) @map("is_default") // thêm
+  isDefault Boolean    @default(false) @map("is_default")
   createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[] @relation("TransactionWallet")
-  transfersIn  Transaction[] @relation("TransferToWallet") // thêm
+  transfersIn  Transaction[] @relation("TransferToWallet")
 
   @@map("wallets")
 }
@@ -82,10 +82,10 @@ model Wallet {
 model Transaction {
   id                    String          @id @default(uuid()) @db.Uuid
   userId                String          @map("user_id") @db.Uuid
-  categoryId            String?         @map("category_id") @db.Uuid // FIX: nullable
+  categoryId            String?         @map("category_id") @db.Uuid
   walletId              String          @map("wallet_id") @db.Uuid
-  transferToWalletId    String?         @map("transfer_to_wallet_id") @db.Uuid // thêm
-  aiSuggestedCategoryId String?         @map("ai_suggested_category_id") @db.Uuid // FIX: proper relation
+  transferToWalletId    String?         @map("transfer_to_wallet_id") @db.Uuid
+  aiSuggestedCategoryId String?         @map("ai_suggested_category_id") @db.Uuid
   type                  TransactionType
   amount                Decimal         @db.Decimal(15, 2)
   description           String?         @db.Text
@@ -94,7 +94,7 @@ model Transaction {
   tags                  String[]
   receiptUrl            String?         @map("receipt_url") @db.Text
   createdAt             DateTime        @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt             DateTime        @updatedAt @map("updated_at") @db.Timestamptz // thêm
+  updatedAt             DateTime        @updatedAt @map("updated_at") @db.Timestamptz
 
   user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   category            Category? @relation("TransactionCategory", fields: [categoryId], references: [id], onDelete: SetNull)
@@ -102,7 +102,6 @@ model Transaction {
   transferToWallet    Wallet?   @relation("TransferToWallet", fields: [transferToWalletId], references: [id])
   aiSuggestedCategory Category? @relation("AISuggestedCategory", fields: [aiSuggestedCategoryId], references: [id], onDelete: SetNull)
 
-  // FIX: composite indexes thay vì đơn lẻ
   @@index([userId, transactionDate(sort: Desc)])
   @@index([userId, categoryId])
   @@index([userId, type, transactionDate(sort: Desc)])
