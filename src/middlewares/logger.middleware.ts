@@ -1,13 +1,16 @@
+import { Injectable, Logger } from '@nestjs/common';
 import { Context } from 'telegraf';
 
-export const LoggerMiddleware = async (
-  ctx: Context,
-  next: () => Promise<void>,
-) => {
-  const start = Date.now();
+@Injectable()
+export class LoggerMiddleware {
+  private readonly logger = new Logger(LoggerMiddleware.name);
 
-  await next();
+  async use(ctx: Context, next: () => Promise<void>) {
+    const start = Date.now();
 
-  const ms = Date.now() - start;
-  console.log(`Lệnh từ ${ctx.from?.username} xử lý mất ${ms}ms`);
-};
+    await next();
+
+    const ms = Date.now() - start;
+    this.logger.log(`Command from @${ctx.from?.username} processed in ${ms}ms`);
+  }
+}

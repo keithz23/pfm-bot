@@ -3,7 +3,7 @@ name: Deploy App to EC2
 on:
   push:
     branches:
-      - main
+      - feat/add-staging
 
 jobs:
   build-and-push:
