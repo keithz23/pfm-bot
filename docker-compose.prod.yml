@@ -34,6 +34,7 @@ services:
       TELEGRAF_TOKEN: ${TELEGRAF_TOKEN}
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      TZ: Asia/Ho_Chi_Minh
     command: >
       sh -c "npx prisma migrate deploy && node dist/src/main.js"
 
