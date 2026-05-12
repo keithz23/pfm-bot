@@ -5,6 +5,8 @@ import { TelegrafModule } from 'nestjs-telegraf';
 import appConfig from './config/app.config';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BotModule } from './bot/bot.module';
+import { SpendModule } from './spend/spend.module';
+import * as LocalSession from 'telegraf-session-local';
 import { MiddlewareModule } from './middlewares/middleware.module';
 
 // const localSession = new LocalSession({ database: 'session_db.json' });
@@ -39,6 +41,7 @@ import { MiddlewareModule } from './middlewares/middleware.module';
       }),
     }),
     BotModule,
+    SpendModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -3,16 +3,18 @@ import { BotService } from './bot.service';
 import { BotController } from './bot.controller';
 import { BotUpdate } from './bot.update';
 import { PrismaModule } from 'src/prisma/prisma.module';
+import { SpendModule } from 'src/spend/spend.module';
+import { SpendService } from 'src/spend/spend.service';
 import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
-import { AuthMiddleware } from 'src/middlewares/logger-auth.middleware';
 import { LoggerMiddleware } from 'src/middlewares/logger.middleware';
+import { AuthMiddleware } from 'src/middlewares/logger-auth.middleware';
 import { MiddlewareModule } from 'src/middlewares/middleware.module';
 
 @Module({
-  imports: [PrismaModule, MiddlewareModule],
+  imports: [PrismaModule, SpendModule, MiddlewareModule],
   controllers: [BotController],
-  providers: [BotService, BotUpdate],
+  providers: [BotService, BotUpdate, SpendService],
 })
 export class BotModule {
   constructor(
