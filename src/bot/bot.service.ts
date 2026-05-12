@@ -44,6 +44,22 @@ export class BotService {
     });
   }
 
+  async getUserIdByTelegramId(telegramId: number): Promise<string | null> {
+    const tId = BigInt(telegramId);
+    const user = await this.prisma.user.findUnique({
+      where: { telegramId: tId },
+      select: { id: true },
+    });
+    return user?.id || null;
+  }
+
+  async getWalletById(walletId: string) {
+    return await this.prisma.wallet.findUnique({
+      where: { id: walletId },
+      select: { id: true, name: true },
+    });
+  }
+
   async logExpense(
     telegramId: number,
     amount: number,

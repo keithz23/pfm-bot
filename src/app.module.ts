@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { AuthMiddleware } from './middlewares/logger-auth.middleware';
 import { BotModule } from './bot/bot.module';
+import { SpendModule } from './spend/spend.module';
 import * as LocalSession from 'telegraf-session-local';
 
 // const localSession = new LocalSession({ database: 'session_db.json' });
@@ -35,6 +36,7 @@ import * as LocalSession from 'telegraf-session-local';
       }),
     }),
     BotModule,
+    SpendModule,
   ],
   controllers: [AppController],
   providers: [AppService],
