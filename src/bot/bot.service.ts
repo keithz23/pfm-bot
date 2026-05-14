@@ -2,10 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TransactionType, WalletType } from 'generated/prisma/enums';
 import { Decimal } from '@prisma/client/runtime/index-browser';
+import dayjs = require('dayjs');
+import utc = require('dayjs/plugin/utc');
+import timezone = require('dayjs/plugin/timezone');
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 @Injectable()
 export class BotService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async initUserAndWallet(telegramId: number, name: string) {
     const tId = BigInt(telegramId);
@@ -124,25 +130,11 @@ export class BotService {
 
   async getDailyReport(telegramId: number) {
     const tId = BigInt(telegramId);
-    const now = new Date();
 
-    // Thiết lập mốc thời gian từ 00:00:00 đến 23:59:59 của ngày hôm nay
-    const startOfDay = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      0,
-      0,
-      0,
-    );
-    const endOfDay = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      23,
-      59,
-      59,
-    );
+    const timeZone = 'Asia/Ho_Chi_Minh';
+    const now = dayjs().tz(timeZone);
+
+    const todayDateOnly = new Date(now.format('YYYY-MM-DD'));
 
     const user = await this.prisma.user.findUnique({
       where: { telegramId: tId },
@@ -151,22 +143,22 @@ export class BotService {
 
     if (!user) return 'Tài khoản chưa được khởi tạo.';
 
-    // Lấy danh sách chi tiết các giao dịch trong ngày
     const transactions = await this.prisma.transaction.findMany({
       where: {
         userId: user.id,
         type: TransactionType.EXPENSE,
         transactionDate: {
-          gte: startOfDay,
-          lte: endOfDay,
+          equals: todayDateOnly,
         },
       },
       include: { category: true, wallet: true },
       orderBy: { createdAt: 'desc' },
     });
 
+    const todayStr = now.format('DD/MM/YYYY');
+
     if (transactions.length === 0) {
-      return `*Báo cáo ngày ${now.toLocaleDateString('vi-VN')}:*\nBạn chưa ghi nhận khoản chi tiêu nào hôm nay.`;
+      return `*Báo cáo ngày ${todayStr}:*\nBạn chưa ghi nhận khoản chi tiêu nào hôm nay.`;
     }
 
     const totalDaily = transactions.reduce(
@@ -174,19 +166,17 @@ export class BotService {
       0,
     );
 
-    let reportTxt = `*CHI TIÊU HÔM NAY (${now.toLocaleDateString('vi-VN')})*\n`;
+    let reportTxt = `*CHI TIÊU HÔM NAY (${todayStr})*\n`;
     reportTxt += `──────────────\n`;
 
     transactions.forEach((tx) => {
-      const time = tx.createdAt.toLocaleTimeString('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+      const timeStr = dayjs(tx.createdAt).tz(timeZone).format('HH:mm');
+
       const catName = this.escapeMarkdown(tx.category.name);
       const walletName = this.escapeMarkdown(tx.wallet.name);
       const note = tx.note ? ` - _${this.escapeMarkdown(tx.note)}_` : '';
 
-      reportTxt += `• [${time}] *${Number(tx.amount).toLocaleString('vi-VN')}* (${catName} | ${walletName})${note}\n`;
+      reportTxt += `• [${timeStr}] *${Number(tx.amount).toLocaleString('vi-VN')}* (${catName} | ${walletName})${note}\n`;
     });
 
     reportTxt += `──────────────\n`;
