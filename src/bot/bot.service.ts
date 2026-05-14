@@ -131,11 +131,9 @@ export class BotService {
   async getDailyReport(telegramId: number) {
     const tId = BigInt(telegramId);
 
-    // 1. Cố định múi giờ cho toàn bộ luồng xử lý
     const timeZone = 'Asia/Ho_Chi_Minh';
     const now = dayjs().tz(timeZone);
 
-    // 2. Thiết lập mốc thời gian chuẩn xác bằng dayjs
     const startOfDay = now.startOf('day').toDate();
     const endOfDay = now.endOf('day').toDate();
 
@@ -159,7 +157,6 @@ export class BotService {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Format ngày hiển thị: DD/MM/YYYY
     const todayStr = now.format('DD/MM/YYYY');
 
     if (transactions.length === 0) {
@@ -175,7 +172,6 @@ export class BotService {
     reportTxt += `──────────────\n`;
 
     transactions.forEach((tx) => {
-      // 4. Format lại thời gian của từng giao dịch sang đúng múi giờ VN
       const timeStr = dayjs(tx.createdAt).tz(timeZone).format('HH:mm');
 
       const catName = this.escapeMarkdown(tx.category.name);

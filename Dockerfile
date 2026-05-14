@@ -1,6 +1,7 @@
 FROM node:20-alpine AS builder
 
 RUN apk add --no-cache openssl
+RUN apk add --no-cache tzdata
 
 WORKDIR /app
 
@@ -19,6 +20,7 @@ RUN npm run build
 FROM node:20-alpine AS production
 
 RUN apk add --no-cache openssl
+RUN apk add --no-cache tzdata
 
 ENV NODE_ENV=production
 
