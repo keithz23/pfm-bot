@@ -1,10 +1,11 @@
-import { Update, Ctx, Start, Command } from 'nestjs-telegraf';
-import { Context } from 'telegraf';
+import { Update, Ctx, Start, Command, Action } from 'nestjs-telegraf';
+import { Context, Markup } from 'telegraf';
 import { BotService } from './bot.service';
+import { SpendService } from 'src/spend/spend.service';
 
 @Update()
 export class BotUpdate {
-  constructor(private readonly botService: BotService) {}
+  constructor(private readonly botService: BotService, private readonly spendService: SpendService) { }
 
   private parseAmount(str: string): number {
     const multiplier = str.toLowerCase().endsWith('k')
@@ -18,6 +19,10 @@ export class BotUpdate {
 
   private escapeMarkdown(text: string): string {
     return text.replace(/([_*`[\]])/g, '\\$1');
+  }
+
+  private escapeMarkdownV2(text: string): string {
+    return text.replace(/([_*[\]()~`>#+=|{}.!-])/g, '\\$1');
   }
 
   @Start()
@@ -53,8 +58,8 @@ export class BotUpdate {
     if (args.length < 3) {
       return ctx.reply(
         `*Sai cú pháp*\n\n` +
-          `Cú pháp đúng:\n\`/spend [Số tiền] [Danh mục] [Ví] [Ghi chú]\`\n\n` +
-          `Ví dụ: \`/spend 50k an_uong bank an trua\``,
+        `Cú pháp đúng:\n\`/spend [Số tiền] [Danh mục] [Ví] [Ghi chú]\`\n\n` +
+        `Ví dụ: \`/spend 50k an_uong bank an trua\``,
         { parse_mode: 'Markdown' },
       );
     }
@@ -79,6 +84,11 @@ export class BotUpdate {
       const safeWallet = this.escapeMarkdown(result.walletName);
       const safeNote = this.escapeMarkdown(note || 'N/A');
 
+      const undoButton = Markup.button.callback(
+        'Hoàn tác (Undo)',
+        `undo_spend:${result.transaction.id}`
+      );
+
       const response =
         `*GHI NHẬN THÀNH CÔNG*\n\n` +
         `Số tiền: *${amount.toLocaleString('vi-VN')}* VND\n` +
@@ -86,7 +96,11 @@ export class BotUpdate {
         `Ví: ${safeWallet}\n` +
         `Ghi chú: ${safeNote}`;
 
-      await ctx.reply(response, { parse_mode: 'Markdown' });
+      await ctx.reply(response, {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([undoButton])
+      });
+
     } catch (error) {
       console.error(error);
       const errorMessage =
@@ -94,6 +108,43 @@ export class BotUpdate {
       await ctx.reply(`Lỗi: ${this.escapeMarkdown(errorMessage)}`, {
         parse_mode: 'Markdown',
       });
+    }
+  }
+
+  @Action(/^undo_spend:(.+)$/)
+  async onUndoSpend(@Ctx() ctx: Context) {
+    try {
+      const spendId = (ctx as any).match[1];
+      const telegramId = ctx.from!.id;
+      const userId = await this.botService.getUserIdByTelegramId(telegramId);
+
+      if (!userId) {
+        await ctx.answerCbQuery('Lỗi: Không tìm thấy tài khoản người dùng.');
+        return;
+      }
+
+      const deletedTransaction = await this.spendService.deleteSpend(spendId, userId);
+
+      // Get wallet information
+      const wallet = await this.botService.getWalletById(deletedTransaction.walletId);
+
+      await ctx.answerCbQuery('Đã hoàn tác giao dịch!');
+
+      const amount = Number(deletedTransaction.amount).toLocaleString('vi-VN');
+      const walletName = wallet?.name || 'Ví';
+      const safeAmount = this.escapeMarkdownV2(amount);
+      const safeWalletName = this.escapeMarkdownV2(walletName);
+
+      await ctx.editMessageText(
+        `*GIAO DỊCH ĐÃ ĐƯỢC HỦY*\n\n` +
+        `Số tiền hoàn về: *${safeAmount}* VND\n` +
+        `Ví nhận: *${safeWalletName}*\n\n` +
+        `Tiền đã được hoàn lại vào ví thành công\\.`,
+        { parse_mode: 'MarkdownV2' }
+      );
+    } catch (error) {
+      console.error(error);
+      await ctx.answerCbQuery('Lỗi: Không thể hoàn tác giao dịch này.');
     }
   }
 
