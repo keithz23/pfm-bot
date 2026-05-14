@@ -134,8 +134,7 @@ export class BotService {
     const timeZone = 'Asia/Ho_Chi_Minh';
     const now = dayjs().tz(timeZone);
 
-    const startOfDay = now.startOf('day').toDate();
-    const endOfDay = now.endOf('day').toDate();
+    const todayDateOnly = new Date(now.format('YYYY-MM-DD'));
 
     const user = await this.prisma.user.findUnique({
       where: { telegramId: tId },
@@ -149,8 +148,7 @@ export class BotService {
         userId: user.id,
         type: TransactionType.EXPENSE,
         transactionDate: {
-          gte: startOfDay,
-          lte: endOfDay,
+          equals: todayDateOnly,
         },
       },
       include: { category: true, wallet: true },
