@@ -47,7 +47,7 @@ Follow these instructions to set up and run the project on your local machine fo
 
 ### 1. Clone the Repository
 ```bash
-git clone [https://github.com/yourusername/pfm-bot.git](https://github.com/yourusername/pfm-bot.git)
+git clone [https://github.com/keithz23/pfm-bot.git](https://github.com/keithz23/pfm-bot.git)
 cd pfm-bot
 ```
 
@@ -65,14 +65,12 @@ DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTG
 
 # --- TELEGRAM CONFIG ---
 TELEGRAF_TOKEN=your_telegram_bot_token_here
-MY_CHAT_ID=your_personal_chat_id
+TELEGRAF_CHAT_ID=your_personal_chat_id
 
 # --- REDIS CONFIG ---
 REDIS_HOST=redis
 REDIS_PORT=6379
 ```
-
-> ⚠️ **IMPORTANT NOTE:** Make sure to find `MY_CHAT_ID` in the `.env` file (and anywhere else it might be hardcoded in the source code) and replace it with your actual Telegram `chat_id`. This ensures that specific administrative alerts, daily reminders, and restricted reports are sent directly to your personal Telegram account.
 
 ### 3. Start the Development Environment
 We use a dedicated Docker Compose file for development (`docker-compose.dev.yml`) which maps ports to your localhost for easy debugging.
